@@ -47,3 +47,8 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 - Special thanks to the developers of the `requests`, `beautifulsoup4`, and `pandas` libraries for their contributions to the Python community.
 
 
+## Addition 1
+# COVID-19 Data Scraper
+
+The `coronaVirus.py` script collects data related to the COVID-19 pandemic from https://www.worldometers.info/coronavirus/. It scrapes information such as total cases, new cases, total deaths, new deaths, total recovered, new recovered, active cases, serious critical cases, total cases per 1M population, deaths per 1M population, total tests conducted, tests per 1M population, and population. The extracted data is stored in an Excel file named `corona_data.xlsx`.
+

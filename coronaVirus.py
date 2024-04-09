@@ -77,52 +77,92 @@ if response.status_code == 200:
   active_recovered_df.loc['criticalDeathsPer', 'recovered'] = deathsPer
   print(active_recovered_df)
 
-  # Find all table rows with website data (adjust selector as needed)
-  table_rows = soup.find_all('table', class_=['wikitable', 'sortable', 'jquery-tablesorter'])
-  t_rows = table_rows[0]
-  tb = t_rows.find('tbody')
-  tr = tb.find_all('tr')
+# Find the table element with id 'main_table_countries_today'
+table = soup.find('table', id='main_table_countries_today')
 
-  # Skip the 2 header rows
-  tr_data = tr[2:]
+# Initialize lists to store data
+data = {
+    'No': [],
+    'Country_other': [],
+    'Total Cases': [],
+    'New Cases': [],
+    'Total Deaths': [],
+    'New Deaths': [],
+    'Total Recovered': [],
+    'New Recovered': [],
+    'Active Cases': [],
+    'Serious Critical': [],
+    'Tot. Cases/1M pop': [],
+    'Deaths/1M pop': [],
+    'Total Tests': [],
+    'Tests/1M pop': [],
+    'Population': []
+}
 
-  # Extract website data and create lists
-  title = []
-  dName = []
-  rSimWeb = []  # Assuming this data is present in the second column
-  website = []
-  rSamrush = []
-  type = []
-  company = []
-  country = []
-  # ... Add similar lists for other columns
+# Find all rows in the table body
+rows = table.find('tbody').find_all('tr')
 
-  for row in tr_data:
-    all_tds = row.find_all('td')
-    if all_tds:
-      dName.append(all_tds[0].text.strip())
-      rSimWeb.append(all_tds[1].text.strip())  # Assuming this data is in the second column
-      website.append(row.find('a').text.strip())
-      rSamrush.append(all_tds[2].text.strip())  # Adjust index based on actual structure
-      type.append(all_tds[3].text.strip())  # Adjust index based on actual structure
-      company.append(all_tds[4].text.strip())  # Adjust index based on actual structure
-      country.append(all_tds[5].text.strip())
-      # ... Add similar logic for other columns
+# Iterate over each row and extract relevant data
+for row in rows:
+    # Find the cells in the row
+    cells = row.find_all('td')
+    
+    # Extract data from each cell and append to respective lists
+    data['No'].append(cells[0].text.strip())
+    data['Country_other'].append(cells[1].text.strip())
+    data['Total Cases'].append(cells[2].text.strip())
+    data['New Cases'].append(cells[3].text.strip())
+    data['Total Deaths'].append(cells[4].text.strip())
+    data['New Deaths'].append(cells[5].text.strip())
+    data['Total Recovered'].append(cells[6].text.strip())
+    data['New Recovered'].append(cells[7].text.strip())
+    data['Active Cases'].append(cells[8].text.strip())
+    data['Serious Critical'].append(cells[9].text.strip())
+    data['Tot. Cases/1M pop'].append(cells[10].text.strip())
+    data['Deaths/1M pop'].append(cells[11].text.strip())
+    data['Total Tests'].append(cells[12].text.strip())
+    data['Tests/1M pop'].append(cells[13].text.strip())
+    data['Population'].append(cells[14].text.strip())
 
-  # Create a pandas DataFrame
-  df = pd.DataFrame({
-      "Website": website,
-      "Domain Name": dName,
-      "Rank_SimilarWeb": rSimWeb,
-      "Rank_Samrush": rSamrush,
-      "Type": type,
-      "Company": company,
-      "Country": country
-  })
+# Create a DataFrame using the extracted data
+df = pd.DataFrame(data)
 
-  # Save the DataFrame to an Excel file
-  df.to_excel("website_data.xlsx", index=False)  # Saves without index column
-  print("Data saved to website_data.xlsx")
+# Drop the first 7 rows from the DataFrame
+df = df.iloc[8:]
 
-else:
-  print("Failed to retrieve the webpage content.")
+# Reset the index after dropping rows
+df.reset_index(drop=True, inplace=True)
+
+# Display the DataFrame
+# print(df)
+
+# Save the DataFrame to an Excel file
+print(df.head(n=10))
+# df.to_excel("corona_data.xlsx", index=False)  # Saves without index column
+
+
+# Create a Pandas Excel writer using openpyxl
+with pd.ExcelWriter('corona_data.xlsx', engine='openpyxl') as writer:
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+
+    # Get the Excel writer object from the Pandas Excel writer
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    # Adjust the column widths based on content length
+    for column in worksheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        # adjusted_width = (max_length + 2) * 1.2
+        adjusted_width = (max_length + 0) * 1.2
+        worksheet.column_dimensions[column_letter].width = adjusted_width
+
+    # Save the Excel file
+    writer._save()
+print("Data saved to website_data.xlsx")
