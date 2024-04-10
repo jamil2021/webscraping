@@ -25,7 +25,7 @@ search_box.send_keys(Keys.RETURN)
 time.sleep(2)
 
 # Find the first search result and print it
-result = driver.find_element(By.CSS_SELECTOR, "ul.menu li h3")
+result = driver.find_element(By.CSS_SELECTOR, "ul.menu li h3 a")
 print(result.text)
 
 # Close the browser
